@@ -6,9 +6,9 @@ import SignIn from "./pages/SignIn";
 import Dashboard from "./pages/Dashboard";
 
 export default function App() {
-  const [user, setUser]       = useState(null);
+  const [user,    setUser]    = useState(null);
   const [loading, setLoading] = useState(true);
-  const [page, setPage]       = useState("landing"); // "landing" | "signin" | "dashboard"
+  const [page,    setPage]    = useState("landing"); // "landing" | "signin" | "dashboard"
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (firebaseUser) => {
@@ -21,22 +21,27 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-surface flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 rounded-full border-2 border-burnt border-t-transparent animate-spin" />
-          <span className="text-sm text-charcoal/40 font-body tracking-wide">Loading…</span>
-        </div>
+      <div style={{
+        minHeight: "100vh", background: "#F2F2F7",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        flexDirection: "column", gap: "12px",
+        fontFamily: "-apple-system,'SF Pro Display','Helvetica Neue',Arial,sans-serif",
+      }}>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        <div style={{
+          width: "28px", height: "28px", borderRadius: "50%",
+          border: "2.5px solid rgba(255,107,0,0.2)",
+          borderTopColor: "#FF6B00",
+          animation: "spin 0.7s linear infinite",
+        }} />
+        <span style={{ fontSize: "14px", color: "#AEAEB2", fontWeight: 500 }}>Loading…</span>
       </div>
     );
   }
 
-  if (user) {
-    return <Dashboard user={user} />;
-  }
+  if (user) return <Dashboard user={user} />;
 
-  if (page === "signin") {
-    return <SignIn onBack={() => setPage("landing")} />;
-  }
+  if (page === "signin") return <SignIn onBack={() => setPage("landing")} />;
 
   return <LandingPage onGetStarted={() => setPage("signin")} />;
 }

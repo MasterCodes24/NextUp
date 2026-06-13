@@ -1,37 +1,53 @@
 import React, { useEffect, useState, useRef } from "react";
 import { signOut } from "firebase/auth";
 import {
-  collection,
-  addDoc,
-  deleteDoc,
-  updateDoc,
-  doc,
-  onSnapshot,
-  serverTimestamp,
-  query,
-  orderBy,
+  collection, addDoc, deleteDoc, updateDoc, doc,
+  onSnapshot, serverTimestamp, query, orderBy,
 } from "firebase/firestore";
 import { auth, db } from "../firebase";
-import {
-  Plus,
-  Trash2,
-  LogOut,
-  ListChecks,
-  ChevronRight,
-  CheckCircle2,
-  Circle,
-  X,
-  Menu,
-} from "lucide-react";
 
-/* ─── Sidebar ─────────────────────────────────────────────────────────────── */
+/* ── Icons (inline SVGs — no lucide import needed, avoids any icon issues) ── */
 
+const IconPlus       = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>;
+const IconTrash      = ({ size=15 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>;
+const IconLogOut     = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>;
+const IconList       = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>;
+const IconCircle     = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/></svg>;
+const IconCheckCircle= () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>;
+const IconX          = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
+const IconMenu       = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>;
+const IconChevronRight=()=><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>;
+
+/* ── Token System ─────────────────────────────────────────────────────────── */
+const T = {
+  bg:        "#F2F2F7",
+  bgPanel:   "#FFFFFF",
+  border:    "rgba(0,0,0,0.08)",
+  borderMid: "rgba(0,0,0,0.12)",
+  text1:     "#1C1C1E",
+  text2:     "#3A3A3C",
+  text3:     "#636366",
+  text4:     "#AEAEB2",
+  accent:    "#FF6B00",
+  accentBg:  "rgba(255,107,0,0.10)",
+  accentHov: "#E05E00",
+  green:     "#34C759",
+  greenBg:   "rgba(52,199,89,0.10)",
+  red:       "#FF3B30",
+  redBg:     "rgba(255,59,48,0.10)",
+  sidebarW:  "264px",
+  radius:    "16px",
+  radiusSm:  "10px",
+  shadow:    "0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.05)",
+};
+
+/* ── Sidebar ─────────────────────────────────────────────────────────────── */
 function Sidebar({ user, lists, selectedListId, onSelectList, onCreateList, onSignOut, mobileOpen, onCloseMobile }) {
-  const [creating, setCreating]   = useState(false);
-  const [newName, setNewName]     = useState("");
-  const inputRef                  = useRef(null);
+  const [creating, setCreating] = useState(false);
+  const [newName,  setNewName]  = useState("");
+  const inputRef                = useRef(null);
 
-  const handleCreateSubmit = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     const trimmed = newName.trim();
     if (!trimmed) return;
@@ -44,121 +60,208 @@ function Sidebar({ user, lists, selectedListId, onSelectList, onCreateList, onSi
     if (creating) inputRef.current?.focus();
   }, [creating]);
 
+  const sidebarStyle = {
+    position: "fixed",
+    top: 0, bottom: 0, left: 0,
+    width: T.sidebarW,
+    display: "flex", flexDirection: "column",
+    background: T.bgPanel,
+    borderRight: `1px solid ${T.border}`,
+    zIndex: 30,
+    transition: "transform 0.3s cubic-bezier(0.25,0.46,0.45,0.94)",
+    fontFamily: "-apple-system,'SF Pro Display','Helvetica Neue',Arial,sans-serif",
+  };
+
   return (
     <>
       {/* Mobile backdrop */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 z-20 bg-black/30 backdrop-blur-sm md:hidden"
           onClick={onCloseMobile}
+          style={{
+            position: "fixed", inset: 0, zIndex: 20,
+            background: "rgba(0,0,0,0.35)",
+            backdropFilter: "blur(4px)",
+          }}
         />
       )}
 
-      <aside
-        className={`
-          fixed md:relative inset-y-0 left-0 z-30
-          w-72 flex flex-col bg-white border-r border-black/5
-          transform transition-transform duration-300 ease-apple
-          ${mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
-        `}
+      <aside style={{
+        ...sidebarStyle,
+        transform: mobileOpen ? "translateX(0)" : undefined,
+      }}
+        className={`${mobileOpen ? "" : "max-md:!translate-x-[-100%]"} md:!translate-x-0`}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 pt-8 pb-4">
-          <span className="font-display text-2xl font-bold text-charcoal tracking-tight">
-            Next<span className="text-burnt">Up</span>
+        {/* Logo + close */}
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "28px 20px 16px",
+        }}>
+          <span style={{ fontWeight: 800, fontSize: "20px", letterSpacing: "-0.03em", color: T.text1 }}>
+            Next<span style={{ color: T.accent }}>Up</span>
           </span>
           <button
-            className="md:hidden text-charcoal/40 hover:text-charcoal transition-colors"
+            className="md:hidden"
             onClick={onCloseMobile}
+            style={{
+              color: T.text3, background: "none", border: "none",
+              cursor: "pointer", padding: "4px", borderRadius: "8px",
+              display: "flex", alignItems: "center",
+            }}
           >
-            <X size={20} />
+            <IconX />
           </button>
         </div>
 
-        {/* Create new list button */}
-        <div className="px-4 pb-4">
+        {/* New list */}
+        <div style={{ padding: "0 12px 12px" }}>
           {creating ? (
-            <form onSubmit={handleCreateSubmit}>
+            <form onSubmit={handleSubmit}>
               <input
                 ref={inputRef}
                 value={newName}
-                onChange={(e) => setNewName(e.target.value)}
+                onChange={e => setNewName(e.target.value)}
                 onBlur={() => { if (!newName.trim()) setCreating(false); }}
-                onKeyDown={(e) => e.key === "Escape" && setCreating(false)}
+                onKeyDown={e => e.key === "Escape" && setCreating(false)}
                 placeholder="List name…"
-                className="w-full px-4 py-2.5 rounded-xl border border-burnt/40 bg-burnt/5 text-sm font-body text-charcoal placeholder-charcoal/30 outline-none focus:border-burnt focus:ring-2 focus:ring-burnt/15 transition-all"
+                style={{
+                  width: "100%", padding: "10px 14px",
+                  borderRadius: T.radiusSm,
+                  border: `1.5px solid ${T.accent}`,
+                  background: T.accentBg,
+                  color: T.text1, fontSize: "14px",
+                  outline: "none",
+                  boxShadow: `0 0 0 3px rgba(255,107,0,0.15)`,
+                  fontFamily: "inherit",
+                }}
               />
             </form>
           ) : (
             <button
               onClick={() => setCreating(true)}
-              className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl bg-burnt text-white text-sm font-body font-medium hover:bg-terracotta active:scale-95 transition-all duration-150 shadow-md shadow-burnt/25"
+              style={{
+                width: "100%", display: "flex", alignItems: "center",
+                gap: "8px", padding: "10px 14px",
+                borderRadius: T.radiusSm,
+                background: T.accent, color: "#fff",
+                fontSize: "14px", fontWeight: 600,
+                border: "none", cursor: "pointer",
+                boxShadow: "0 4px 12px rgba(255,107,0,0.30)",
+                transition: "all 0.15s ease",
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = T.accentHov; }}
+              onMouseLeave={e => { e.currentTarget.style.background = T.accent; }}
             >
-              <Plus size={16} />
+              <IconPlus />
               New Bucket List
             </button>
           )}
         </div>
 
         {/* List items */}
-        <div className="flex-1 overflow-y-auto px-4">
-          <p className="text-[10px] font-body font-semibold text-charcoal/30 uppercase tracking-widest px-2 mb-2">
+        <div style={{ flex: 1, overflowY: "auto", padding: "0 12px" }}>
+          <p style={{
+            fontSize: "11px", fontWeight: 700, color: T.text4,
+            textTransform: "uppercase", letterSpacing: "0.08em",
+            padding: "4px 8px 8px",
+          }}>
             My Lists
           </p>
+
           {lists.length === 0 && (
-            <p className="text-xs font-body text-charcoal/30 px-2 py-2 italic font-light">
+            <p style={{ fontSize: "13px", color: T.text4, padding: "4px 8px", fontStyle: "italic" }}>
               No lists yet. Create one above!
             </p>
           )}
-          <ul className="space-y-0.5">
-            {lists.map((list) => (
-              <li key={list.id}>
-                <button
-                  onClick={() => { onSelectList(list.id); onCloseMobile(); }}
-                  className={`
-                    w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-body font-medium text-left transition-all duration-150
-                    ${selectedListId === list.id
-                      ? "bg-burnt/10 text-burnt"
-                      : "text-charcoal/60 hover:bg-surface hover:text-charcoal"
-                    }
-                  `}
-                >
-                  <span className="flex items-center gap-2.5">
-                    <ListChecks size={15} className={selectedListId === list.id ? "text-burnt" : "text-charcoal/30"} />
-                    <span className="truncate max-w-[140px]">{list.name}</span>
-                  </span>
-                  {selectedListId === list.id && <ChevronRight size={14} className="text-burnt/60 shrink-0" />}
-                </button>
-              </li>
-            ))}
+
+          <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "2px" }}>
+            {lists.map(list => {
+              const active = selectedListId === list.id;
+              return (
+                <li key={list.id}>
+                  <button
+                    onClick={() => { onSelectList(list.id); onCloseMobile(); }}
+                    style={{
+                      width: "100%", display: "flex", alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "9px 12px", borderRadius: T.radiusSm,
+                      background: active ? T.accentBg : "transparent",
+                      color: active ? T.accent : T.text2,
+                      fontSize: "14px", fontWeight: active ? 600 : 500,
+                      border: "none", cursor: "pointer", textAlign: "left",
+                      transition: "all 0.12s ease",
+                    }}
+                    onMouseEnter={e => { if (!active) e.currentTarget.style.background = T.bg; }}
+                    onMouseLeave={e => { if (!active) e.currentTarget.style.background = "transparent"; }}
+                  >
+                    <span style={{ display: "flex", alignItems: "center", gap: "8px", overflow: "hidden" }}>
+                      <span style={{ color: active ? T.accent : T.text4, flexShrink: 0 }}><IconList /></span>
+                      <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "148px" }}>
+                        {list.name}
+                      </span>
+                    </span>
+                    {active && <span style={{ color: T.accent, flexShrink: 0 }}><IconChevronRight /></span>}
+                  </button>
+                </li>
+              );
+            })}
           </ul>
         </div>
 
-        {/* User profile + sign out */}
-        <div className="px-4 pb-6 pt-4 border-t border-black/5">
-          <div className="flex items-center gap-3 mb-3">
+        {/* User + sign out */}
+        <div style={{
+          padding: "16px 12px 24px",
+          borderTop: `1px solid ${T.border}`,
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px", padding: "0 4px" }}>
             {user.photoURL ? (
               <img
-                src={user.photoURL}
-                alt={user.displayName}
+                src={user.photoURL} alt={user.displayName}
                 referrerPolicy="no-referrer"
-                className="w-8 h-8 rounded-full object-cover ring-2 ring-burnt/20"
+                style={{ width: "34px", height: "34px", borderRadius: "50%", objectFit: "cover", border: `2px solid ${T.border}` }}
               />
             ) : (
-              <div className="w-8 h-8 rounded-full bg-burnt/20 flex items-center justify-center text-burnt text-sm font-bold font-display">
+              <div style={{
+                width: "34px", height: "34px", borderRadius: "50%",
+                background: T.accentBg, display: "flex", alignItems: "center",
+                justifyContent: "center", color: T.accent, fontWeight: 700, fontSize: "14px",
+              }}>
                 {user.displayName?.[0] ?? "?"}
               </div>
             )}
-            <div className="min-w-0">
-              <p className="text-sm font-body font-semibold text-charcoal truncate">{user.displayName}</p>
-              <p className="text-xs font-body text-charcoal/35 truncate">{user.email}</p>
+            <div style={{ minWidth: 0 }}>
+              <p style={{ fontSize: "14px", fontWeight: 600, color: T.text1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {user.displayName}
+              </p>
+              <p style={{ fontSize: "12px", color: T.text4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {user.email}
+              </p>
             </div>
           </div>
+
           <button
             onClick={onSignOut}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-body font-medium text-charcoal/40 border border-black/8 hover:border-terracotta/40 hover:text-terracotta hover:bg-terracotta/5 transition-all duration-150"
+            style={{
+              width: "100%", display: "flex", alignItems: "center",
+              justifyContent: "center", gap: "7px",
+              padding: "9px 16px", borderRadius: T.radiusSm,
+              background: "transparent", color: T.text3,
+              fontSize: "13px", fontWeight: 500,
+              border: `1.5px solid ${T.border}`, cursor: "pointer",
+              transition: "all 0.15s ease",
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.borderColor = "rgba(255,59,48,0.4)";
+              e.currentTarget.style.color = T.red;
+              e.currentTarget.style.background = T.redBg;
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.borderColor = T.border;
+              e.currentTarget.style.color = T.text3;
+              e.currentTarget.style.background = "transparent";
+            }}
           >
-            <LogOut size={13} />
+            <IconLogOut />
             Sign Out
           </button>
         </div>
@@ -167,8 +270,7 @@ function Sidebar({ user, lists, selectedListId, onSelectList, onCreateList, onSi
   );
 }
 
-/* ─── Item Row ─────────────────────────────────────────────────────────────── */
-
+/* ── Item Row ─────────────────────────────────────────────────────────────── */
 function ItemRow({ item, userId, listId }) {
   const [hovered, setHovered] = useState(false);
 
@@ -184,47 +286,60 @@ function ItemRow({ item, userId, listId }) {
     <li
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className="group flex items-center gap-3 py-3 px-1 border-b border-black/4 last:border-0 transition-all duration-150"
+      style={{
+        display: "flex", alignItems: "center", gap: "12px",
+        padding: "12px 16px",
+        borderBottom: `1px solid ${T.border}`,
+        transition: "background 0.12s ease",
+        background: hovered ? T.bg : "transparent",
+      }}
     >
       <button
         onClick={toggle}
-        className="shrink-0 text-charcoal/25 hover:text-burnt transition-colors duration-150"
+        style={{
+          flexShrink: 0, background: "none", border: "none",
+          cursor: "pointer", padding: 0,
+          color: item.completed ? T.green : T.text4,
+          display: "flex", alignItems: "center",
+          transition: "color 0.15s ease",
+        }}
+        title={item.completed ? "Mark incomplete" : "Mark complete"}
       >
-        {item.completed ? (
-          <CheckCircle2 size={21} className="text-teal" />
-        ) : (
-          <Circle size={21} />
-        )}
+        {item.completed ? <IconCheckCircle /> : <IconCircle />}
       </button>
 
-      <span
-        className={`flex-1 text-sm font-body leading-relaxed transition-all duration-200 ${
-          item.completed ? "line-through text-charcoal/30" : "text-charcoal"
-        }`}
-      >
+      <span style={{
+        flex: 1, fontSize: "15px", lineHeight: "1.4", color: item.completed ? T.text4 : T.text1,
+        textDecoration: item.completed ? "line-through" : "none",
+        transition: "all 0.2s ease",
+      }}>
         {item.text}
       </span>
 
       <button
         onClick={remove}
-        className={`shrink-0 text-charcoal/20 hover:text-terracotta transition-all duration-150 ${
-          hovered ? "opacity-100" : "opacity-0"
-        }`}
-        aria-label="Delete item"
+        title="Delete item"
+        style={{
+          flexShrink: 0, background: "none", border: "none",
+          cursor: "pointer", padding: "4px",
+          color: T.red, borderRadius: "6px",
+          opacity: hovered ? 1 : 0,
+          transition: "opacity 0.15s ease",
+          display: "flex", alignItems: "center",
+        }}
       >
-        <Trash2 size={15} />
+        <IconTrash />
       </button>
     </li>
   );
 }
 
-/* ─── Main Content ─────────────────────────────────────────────────────────── */
-
+/* ── Main Content ─────────────────────────────────────────────────────────── */
 function MainContent({ user, selectedList }) {
-  const [items, setItems]       = useState([]);
-  const [newText, setNewText]   = useState("");
-  const [loading, setLoading]   = useState(false);
-  const inputRef                = useRef(null);
+  const [items,   setItems]   = useState([]);
+  const [newText, setNewText] = useState("");
+  const [loading, setLoading] = useState(false);
+  const inputRef              = useRef(null);
 
   useEffect(() => {
     if (!selectedList) return;
@@ -233,8 +348,8 @@ function MainContent({ user, selectedList }) {
       collection(db, "users", user.uid, "lists", selectedList.id, "items"),
       orderBy("createdAt", "asc")
     );
-    const unsub = onSnapshot(q, (snap) => {
-      setItems(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+    const unsub = onSnapshot(q, snap => {
+      setItems(snap.docs.map(d => ({ id: d.id, ...d.data() })));
       setLoading(false);
     });
     return unsub;
@@ -258,106 +373,168 @@ function MainContent({ user, selectedList }) {
     await deleteDoc(doc(db, "users", user.uid, "lists", selectedList.id));
   };
 
-  const completedCount = items.filter((i) => i.completed).length;
+  const completedCount = items.filter(i => i.completed).length;
+  const progress = items.length > 0 ? completedCount / items.length : 0;
+  const circumference = 2 * Math.PI * 15; // r=15
 
   if (!selectedList) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center text-center p-12 bg-surface">
-        <div className="w-20 h-20 rounded-3xl bg-white border border-black/5 shadow-sm flex items-center justify-center mb-6">
-          <ListChecks size={32} className="text-burnt/40" />
+      <main style={{
+        flex: 1, display: "flex", flexDirection: "column",
+        alignItems: "center", justifyContent: "center",
+        background: T.bg, textAlign: "center", padding: "48px",
+      }}>
+        <div style={{
+          width: "72px", height: "72px", borderRadius: "20px",
+          background: T.bgPanel, border: `1px solid ${T.border}`,
+          boxShadow: T.shadow, display: "flex",
+          alignItems: "center", justifyContent: "center",
+          fontSize: "32px", marginBottom: "20px",
+        }}>
+          📋
         </div>
-        <h2 className="font-display text-2xl font-bold text-charcoal/30 mb-2">No list selected</h2>
-        <p className="text-sm font-body text-charcoal/25 font-light">
+        <h2 style={{ fontSize: "22px", fontWeight: 700, color: T.text3, marginBottom: "8px", letterSpacing: "-0.01em" }}>
+          No list selected
+        </h2>
+        <p style={{ fontSize: "15px", color: T.text4, fontWeight: 400 }}>
           Pick a list from the sidebar or create a new one.
         </p>
-      </div>
+      </main>
     );
   }
 
   return (
-    <main className="flex-1 flex flex-col min-h-0 bg-surface">
+    <main style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0, background: T.bg }}>
       {/* Header */}
-      <header className="bg-white border-b border-black/5 px-8 py-6 flex items-start justify-between">
+      <header style={{
+        background: T.bgPanel, borderBottom: `1px solid ${T.border}`,
+        padding: "24px 32px",
+        display: "flex", alignItems: "flex-start", justifyContent: "space-between",
+        flexShrink: 0,
+      }}>
         <div>
-          <h1 className="font-display text-3xl font-bold text-charcoal tracking-tight">
+          <h1 style={{
+            fontSize: "28px", fontWeight: 700, color: T.text1,
+            letterSpacing: "-0.025em", marginBottom: "4px",
+          }}>
             {selectedList.name}
           </h1>
-          <p className="text-xs font-body text-charcoal/35 mt-1">
+          <p style={{ fontSize: "13px", color: T.text4, fontWeight: 400 }}>
             {items.length === 0
               ? "No items yet"
               : `${completedCount} of ${items.length} completed`}
           </p>
         </div>
 
-        {/* Progress ring + delete */}
-        <div className="flex items-center gap-4">
+        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
           {items.length > 0 && (
-            <div className="relative w-10 h-10">
-              <svg className="w-10 h-10 -rotate-90" viewBox="0 0 36 36">
-                <circle cx="18" cy="18" r="15" fill="none" stroke="#F5F5F7" strokeWidth="3" />
+            <div style={{ position: "relative", width: "44px", height: "44px" }}>
+              <svg width="44" height="44" style={{ transform: "rotate(-90deg)" }}>
+                <circle cx="22" cy="22" r="15" fill="none" stroke={T.bg} strokeWidth="3.5" />
                 <circle
-                  cx="18" cy="18" r="15" fill="none"
-                  stroke="#069494" strokeWidth="3"
-                  strokeDasharray={`${(completedCount / items.length) * 94.2} 94.2`}
+                  cx="22" cy="22" r="15" fill="none"
+                  stroke={T.green} strokeWidth="3.5"
+                  strokeDasharray={`${progress * circumference} ${circumference}`}
                   strokeLinecap="round"
                   style={{ transition: "stroke-dasharray 0.5s ease" }}
                 />
               </svg>
-              <span className="absolute inset-0 flex items-center justify-center text-[9px] font-body font-bold text-teal">
-                {Math.round((completedCount / items.length) * 100)}%
+              <span style={{
+                position: "absolute", inset: 0,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: "10px", fontWeight: 700, color: T.green,
+              }}>
+                {Math.round(progress * 100)}%
               </span>
             </div>
           )}
+
           <button
             onClick={deleteList}
-            className="text-charcoal/20 hover:text-terracotta transition-colors"
             title="Delete list"
+            style={{
+              background: "none", border: "none", cursor: "pointer",
+              color: T.text4, padding: "8px", borderRadius: "8px",
+              display: "flex", alignItems: "center",
+              transition: "color 0.15s ease",
+            }}
+            onMouseEnter={e => e.currentTarget.style.color = T.red}
+            onMouseLeave={e => e.currentTarget.style.color = T.text4}
           >
-            <Trash2 size={17} />
+            <IconTrash size={17} />
           </button>
         </div>
       </header>
 
-      {/* Add item form */}
-      <div className="px-8 py-5 bg-white border-b border-black/5">
-        <form onSubmit={addItem} className="flex items-center gap-3">
-          <Plus size={16} className="shrink-0 text-charcoal/30" />
+      {/* Add item */}
+      <div style={{
+        background: T.bgPanel, borderBottom: `1px solid ${T.border}`,
+        padding: "16px 32px", flexShrink: 0,
+      }}>
+        <form onSubmit={addItem} style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <span style={{ color: T.text4, flexShrink: 0, display: "flex" }}><IconPlus /></span>
           <input
             ref={inputRef}
             value={newText}
-            onChange={(e) => setNewText(e.target.value)}
+            onChange={e => setNewText(e.target.value)}
             placeholder="Add a new item…"
-            className="flex-1 text-sm font-body text-charcoal placeholder-charcoal/25 bg-transparent outline-none"
+            style={{
+              flex: 1, fontSize: "15px", color: T.text1,
+              background: "transparent", border: "none", outline: "none",
+              fontFamily: "inherit",
+            }}
           />
           <button
             type="submit"
             disabled={!newText.trim()}
-            className="px-4 py-1.5 rounded-xl bg-burnt text-white text-xs font-body font-semibold disabled:opacity-30 disabled:cursor-not-allowed hover:bg-terracotta active:scale-95 transition-all duration-150"
+            style={{
+              padding: "7px 18px", borderRadius: "10px",
+              background: newText.trim() ? T.accent : T.bg,
+              color: newText.trim() ? "#fff" : T.text4,
+              fontSize: "13px", fontWeight: 600,
+              border: "none", cursor: newText.trim() ? "pointer" : "not-allowed",
+              transition: "all 0.15s ease", flexShrink: 0,
+            }}
           >
             Add
           </button>
         </form>
       </div>
 
-      {/* Items list */}
-      <div className="flex-1 overflow-y-auto px-8 py-4">
+      {/* Items */}
+      <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px" }}>
         {loading && (
-          <div className="flex justify-center py-12">
-            <div className="w-5 h-5 rounded-full border-2 border-burnt border-t-transparent animate-spin" />
+          <div style={{ display: "flex", justifyContent: "center", paddingTop: "48px" }}>
+            <div style={{
+              width: "22px", height: "22px", borderRadius: "50%",
+              border: `2.5px solid ${T.accentBg}`,
+              borderTopColor: T.accent,
+              animation: "spin 0.7s linear infinite",
+            }} />
           </div>
         )}
+
         {!loading && items.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <span className="text-4xl mb-3">🪣</span>
-            <p className="text-sm font-body text-charcoal/30 font-light">
+          <div style={{
+            display: "flex", flexDirection: "column",
+            alignItems: "center", justifyContent: "center",
+            paddingTop: "80px", textAlign: "center",
+          }}>
+            <span style={{ fontSize: "40px", marginBottom: "12px" }}>🪣</span>
+            <p style={{ fontSize: "15px", color: T.text4, fontWeight: 400 }}>
               This list is empty. Add your first item above!
             </p>
           </div>
         )}
+
         {!loading && items.length > 0 && (
-          <div className="bg-white rounded-2xl border border-black/5 shadow-sm overflow-hidden">
-            <ul className="divide-y divide-black/4 px-4">
-              {items.map((item) => (
+          <div style={{
+            background: T.bgPanel, borderRadius: T.radius,
+            border: `1px solid ${T.border}`, boxShadow: T.shadow,
+            overflow: "hidden",
+          }}>
+            <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+              {items.map(item => (
                 <ItemRow key={item.id} item={item} userId={user.uid} listId={selectedList.id} />
               ))}
             </ul>
@@ -368,27 +545,24 @@ function MainContent({ user, selectedList }) {
   );
 }
 
-/* ─── Dashboard ────────────────────────────────────────────────────────────── */
-
+/* ── Dashboard ─────────────────────────────────────────────────────────────── */
 export default function Dashboard({ user }) {
-  const [lists, setLists]               = useState([]);
+  const [lists,          setLists]          = useState([]);
   const [selectedListId, setSelectedListId] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const selectedList = lists.find((l) => l.id === selectedListId) ?? null;
+  const selectedList = lists.find(l => l.id === selectedListId) ?? null;
 
-  // Subscribe to lists
   useEffect(() => {
     const q = query(
       collection(db, "users", user.uid, "lists"),
       orderBy("createdAt", "asc")
     );
-    const unsub = onSnapshot(q, (snap) => {
-      const fetched = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    const unsub = onSnapshot(q, snap => {
+      const fetched = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       setLists(fetched);
-      // Auto-select first list if none selected
-      setSelectedListId((prev) => {
-        if (prev && fetched.find((l) => l.id === prev)) return prev;
+      setSelectedListId(prev => {
+        if (prev && fetched.find(l => l.id === prev)) return prev;
         return fetched[0]?.id ?? null;
       });
     });
@@ -403,22 +577,38 @@ export default function Dashboard({ user }) {
     setSelectedListId(ref.id);
   };
 
-  const handleSignOut = async () => {
-    await signOut(auth);
-  };
+  const handleSignOut = () => signOut(auth);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-surface">
+    <div style={{
+      display: "flex", height: "100vh", overflow: "hidden",
+      background: T.bg,
+      fontFamily: "-apple-system,'SF Pro Display','Helvetica Neue',Arial,sans-serif",
+    }}>
+      {/* Spinner keyframes */}
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+
       {/* Mobile top bar */}
-      <div className="fixed top-0 inset-x-0 z-20 flex items-center justify-between px-5 py-4 bg-white border-b border-black/5 md:hidden">
-        <span className="font-display text-xl font-bold text-charcoal">
-          Next<span className="text-burnt">Up</span>
+      <div
+        className="md:hidden"
+        style={{
+          position: "fixed", top: 0, left: 0, right: 0, zIndex: 20,
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "14px 20px",
+          background: T.bgPanel, borderBottom: `1px solid ${T.border}`,
+        }}
+      >
+        <span style={{ fontWeight: 800, fontSize: "20px", letterSpacing: "-0.03em", color: T.text1 }}>
+          Next<span style={{ color: T.accent }}>Up</span>
         </span>
         <button
           onClick={() => setMobileMenuOpen(true)}
-          className="text-charcoal/50 hover:text-charcoal transition-colors"
+          style={{
+            background: "none", border: "none", cursor: "pointer",
+            color: T.text2, padding: "4px", display: "flex", alignItems: "center",
+          }}
         >
-          <Menu size={22} />
+          <IconMenu />
         </button>
       </div>
 
@@ -434,8 +624,13 @@ export default function Dashboard({ user }) {
         onCloseMobile={() => setMobileMenuOpen(false)}
       />
 
-      {/* Main content */}
-      <div className="flex-1 flex flex-col min-w-0 pt-0 md:pt-0 mt-14 md:mt-0 overflow-hidden">
+      {/* Main area: push right of sidebar on desktop */}
+      <div style={{
+        flex: 1, display: "flex", flexDirection: "column", minWidth: 0,
+        overflow: "hidden",
+      }}
+        className="md:ml-[264px] mt-[54px] md:mt-0"
+      >
         <MainContent user={user} selectedList={selectedList} />
       </div>
     </div>

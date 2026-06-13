@@ -2,9 +2,7 @@ import React, { useState } from "react";
 import { signInWithPopup } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, googleProvider, db } from "../firebase";
-import { ArrowLeft, Loader2 } from "lucide-react";
 
-// Google G SVG icon
 function GoogleIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -16,6 +14,19 @@ function GoogleIcon() {
   );
 }
 
+function Spinner() {
+  return (
+    <div style={{
+      width: "18px", height: "18px", borderRadius: "50%",
+      border: "2px solid rgba(255,107,0,0.3)",
+      borderTopColor: "#FF6B00",
+      animation: "spin 0.7s linear infinite",
+    }} />
+  );
+}
+
+const spinKeyframes = `@keyframes spin { to { transform: rotate(360deg); } }`;
+
 export default function SignIn({ onBack }) {
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState(null);
@@ -26,8 +37,6 @@ export default function SignIn({ onBack }) {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const user   = result.user;
-
-      // Persist user record in Firestore (merge so existing data is preserved)
       await setDoc(
         doc(db, "users", user.uid),
         {
@@ -38,7 +47,6 @@ export default function SignIn({ onBack }) {
         },
         { merge: true }
       );
-      // Auth state change in App.jsx will redirect to dashboard
     } catch (err) {
       console.error(err);
       if (err.code !== "auth/popup-closed-by-user") {
@@ -49,65 +57,127 @@ export default function SignIn({ onBack }) {
   };
 
   return (
-    <div className="min-h-screen bg-surface flex flex-col items-center justify-center px-6 relative overflow-hidden">
-      {/* Background decorations */}
-      <div className="pointer-events-none absolute inset-0">
-        <div
-          className="absolute top-0 right-0 w-96 h-96 rounded-full opacity-10"
-          style={{ background: "radial-gradient(circle, #FFCE1B 0%, transparent 70%)" }}
-        />
-        <div
-          className="absolute bottom-0 left-0 w-80 h-80 rounded-full opacity-10"
-          style={{ background: "radial-gradient(circle, #069494 0%, transparent 70%)" }}
-        />
+    <div style={{
+      minHeight: "100vh", display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center",
+      background: "#F2F2F7", padding: "24px", position: "relative",
+      fontFamily: "-apple-system,'SF Pro Display','Helvetica Neue',Arial,sans-serif",
+    }}>
+      <style>{spinKeyframes}</style>
+
+      {/* Background decoration */}
+      <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }} aria-hidden>
+        <div style={{
+          position: "absolute", top: 0, right: 0,
+          width: "400px", height: "400px", borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(255,149,0,0.10) 0%, transparent 70%)",
+        }} />
+        <div style={{
+          position: "absolute", bottom: 0, left: 0,
+          width: "350px", height: "350px", borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(0,122,255,0.08) 0%, transparent 70%)",
+        }} />
       </div>
 
       {/* Back button */}
       <button
         onClick={onBack}
-        className="absolute top-6 left-6 inline-flex items-center gap-1.5 text-sm font-body font-medium text-charcoal/50 hover:text-burnt transition-colors"
+        style={{
+          position: "absolute", top: "24px", left: "24px",
+          display: "inline-flex", alignItems: "center", gap: "6px",
+          fontSize: "14px", fontWeight: 500, color: "#636366",
+          background: "none", border: "none", cursor: "pointer",
+          padding: "6px 10px", borderRadius: "8px",
+          transition: "color 0.15s",
+        }}
+        onMouseEnter={e => e.currentTarget.style.color = "#FF6B00"}
+        onMouseLeave={e => e.currentTarget.style.color = "#636366"}
       >
-        <ArrowLeft size={16} />
-        Back
+        ← Back
       </button>
 
       {/* Card */}
-      <div className="animate-fade-up relative w-full max-w-sm bg-white rounded-3xl border border-black/5 shadow-2xl shadow-black/8 p-10 flex flex-col items-center text-center">
-        {/* Logo */}
-        <div className="mb-2 inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-burnt/10">
-          <span className="font-display text-2xl font-bold text-burnt">N</span>
+      <div className="animate-fade-up" style={{
+        width: "100%", maxWidth: "380px",
+        background: "#fff", borderRadius: "24px",
+        border: "1px solid rgba(0,0,0,0.07)",
+        boxShadow: "0 20px 60px rgba(0,0,0,0.10), 0 4px 16px rgba(0,0,0,0.06)",
+        padding: "48px 40px",
+        display: "flex", flexDirection: "column", alignItems: "center",
+        textAlign: "center", position: "relative",
+      }}>
+        {/* Logo mark */}
+        <div style={{
+          width: "60px", height: "60px", borderRadius: "18px",
+          background: "rgba(255,107,0,0.10)", display: "flex",
+          alignItems: "center", justifyContent: "center",
+          marginBottom: "8px",
+        }}>
+          <span style={{ fontSize: "26px", fontWeight: 800, color: "#FF6B00" }}>N</span>
         </div>
 
-        <h1 className="font-display text-2xl font-bold text-charcoal mt-4 mb-1">
+        <h1 style={{
+          fontSize: "24px", fontWeight: 700, color: "#1C1C1E",
+          letterSpacing: "-0.02em", marginTop: "20px", marginBottom: "8px",
+        }}>
           Welcome to NextUp
         </h1>
-        <p className="text-sm font-body text-charcoal/40 font-light mb-8 leading-relaxed">
+        <p style={{
+          fontSize: "15px", color: "#636366", lineHeight: "1.5",
+          fontWeight: 400, marginBottom: "36px",
+        }}>
           Sign in to start building your bucket list.
           <br />One account. All your dreams.
         </p>
 
-        {/* Google Sign-In Button */}
+        {/* Google Sign-In */}
         <button
           onClick={handleGoogleSignIn}
           disabled={loading}
-          className="w-full flex items-center justify-center gap-3 px-6 py-3.5 rounded-2xl bg-white border border-black/10 text-charcoal font-body font-medium text-sm shadow-sm hover:shadow-md hover:border-black/20 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 transition-all duration-200"
+          style={{
+            width: "100%", display: "flex", alignItems: "center",
+            justifyContent: "center", gap: "12px",
+            padding: "14px 24px", borderRadius: "14px",
+            background: "#fff", border: "1.5px solid rgba(0,0,0,0.12)",
+            color: "#1C1C1E", fontSize: "15px", fontWeight: 600,
+            cursor: loading ? "not-allowed" : "pointer",
+            opacity: loading ? 0.7 : 1,
+            boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+            transition: "all 0.2s ease",
+          }}
+          onMouseEnter={e => {
+            if (!loading) {
+              e.currentTarget.style.borderColor = "rgba(0,0,0,0.22)";
+              e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.10)";
+              e.currentTarget.style.transform = "translateY(-1px)";
+            }
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.borderColor = "rgba(0,0,0,0.12)";
+            e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.06)";
+            e.currentTarget.style.transform = "translateY(0)";
+          }}
         >
-          {loading ? (
-            <Loader2 size={18} className="animate-spin text-burnt" />
-          ) : (
-            <GoogleIcon />
-          )}
-          {loading ? "Signing in…" : "Continue with Google"}
+          {loading ? <Spinner /> : <GoogleIcon />}
+          <span>{loading ? "Signing in…" : "Continue with Google"}</span>
         </button>
 
-        {/* Error message */}
+        {/* Error */}
         {error && (
-          <p className="mt-4 text-xs font-body text-terracotta bg-terracotta/8 px-4 py-2.5 rounded-xl">
+          <div style={{
+            marginTop: "16px", width: "100%",
+            padding: "12px 16px", borderRadius: "12px",
+            background: "rgba(255,59,48,0.08)", border: "1px solid rgba(255,59,48,0.20)",
+            color: "#D0190B", fontSize: "13px", fontWeight: 500,
+          }}>
             {error}
-          </p>
+          </div>
         )}
 
-        <p className="mt-8 text-xs font-body text-charcoal/25 leading-relaxed">
+        <p style={{
+          marginTop: "32px", fontSize: "12px", color: "#AEAEB2",
+          lineHeight: "1.6", fontWeight: 400,
+        }}>
           By continuing, you agree to our Terms of Service
           <br />and Privacy Policy.
         </p>

@@ -1,153 +1,262 @@
 import React from "react";
-import { ArrowRight, CheckCircle2, MapPin, Sparkles, Star } from "lucide-react";
 
 const FEATURES = [
   {
-    icon: <CheckCircle2 size={20} />,
-    title: "Track Everything",
-    desc: "Organize dreams into curated lists. Every ambition, every adventure — captured.",
+    emoji: "✅",
+    title: "Capture Everything",
+    desc: "From skydiving to learning Portuguese — every dream deserves a home. Add goals in seconds and never let an idea slip away.",
   },
   {
-    icon: <MapPin size={20} />,
-    title: "Life in Lists",
-    desc: "Create themed bucket lists for travel, learning, experiences, and beyond.",
+    emoji: "📋",
+    title: "Organize Into Lists",
+    desc: "Create separate lists for Travel, Career, Fitness, and more. Keep related goals together so your ambitions stay focused.",
   },
   {
-    icon: <Sparkles size={20} />,
-    title: "Mark Moments",
-    desc: "Check off achievements and relive the journey. Your story, beautifully told.",
+    emoji: "🎯",
+    title: "Track Your Progress",
+    desc: "Check off achievements as you complete them. Watch your progress bar fill up and feel the satisfaction of a life well lived.",
   },
+];
+
+const STATS = [
+  { value: "2.4k", label: "Trips planned" },
+  { value: "18k",  label: "Goals achieved" },
+  { value: "9.1k", label: "Lists created" },
 ];
 
 export default function LandingPage({ onGetStarted }) {
   return (
-    <div className="min-h-screen bg-white overflow-hidden">
-      {/* Nav */}
-      <nav className="fixed top-0 inset-x-0 z-50 flex items-center justify-between px-8 py-5 bg-white/80 backdrop-blur-xl border-b border-black/5">
-        <span className="font-display text-xl font-semibold text-charcoal tracking-tight">
-          Next<span className="text-burnt">Up</span>
-        </span>
+    <div style={{ fontFamily: "-apple-system,'SF Pro Display','Helvetica Neue',Arial,sans-serif" }} className="min-h-screen bg-white overflow-hidden">
+
+      {/* ── Nav ── */}
+      <nav
+        style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}
+        className="fixed top-0 inset-x-0 z-50 flex items-center justify-between px-8 py-4 bg-white/90 backdrop-blur-xl"
+      >
+        <Logo />
         <button
           onClick={onGetStarted}
-          className="text-sm font-body font-medium text-burnt hover:text-terracotta transition-colors"
+          style={{
+            background: "#FF6B00",
+            color: "#fff",
+            borderRadius: "10px",
+            fontWeight: 600,
+            fontSize: "14px",
+            padding: "8px 18px",
+            border: "none",
+            cursor: "pointer",
+          }}
         >
-          Sign In →
+          Get Started
         </button>
       </nav>
 
-      {/* Hero */}
-      <section className="relative flex flex-col items-center justify-center min-h-screen text-center px-6 pt-24 pb-16">
-        {/* Background blobs */}
-        <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div
-            className="absolute -top-32 -right-32 w-[600px] h-[600px] rounded-full opacity-10"
-            style={{ background: "radial-gradient(circle, #BE5103 0%, transparent 70%)" }}
-          />
-          <div
-            className="absolute -bottom-32 -left-32 w-[500px] h-[500px] rounded-full opacity-10"
-            style={{ background: "radial-gradient(circle, #069494 0%, transparent 70%)" }}
-          />
-          <div
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] rounded-full opacity-5"
-            style={{ background: "radial-gradient(ellipse, #FFCE1B 0%, transparent 70%)" }}
-          />
+      {/* ── Hero ── */}
+      <section
+        className="relative flex flex-col items-center justify-center min-h-screen text-center px-6 pt-28 pb-20"
+        style={{ background: "linear-gradient(180deg, #fff 0%, #F2F2F7 100%)" }}
+      >
+        {/* Soft background blobs */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+          <div style={{
+            position: "absolute", top: "-120px", right: "-120px",
+            width: "600px", height: "600px", borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(255,107,0,0.12) 0%, transparent 70%)",
+          }} />
+          <div style={{
+            position: "absolute", bottom: "-120px", left: "-120px",
+            width: "500px", height: "500px", borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(0,122,255,0.08) 0%, transparent 70%)",
+          }} />
         </div>
 
-        {/* Pill badge */}
-        <div className="animate-fade-up mb-6 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent/20 border border-accent/40 text-xs font-body font-semibold text-terracotta tracking-widest uppercase">
-          <Star size={11} fill="currentColor" />
-          Your bucket list, reinvented
+        {/* Badge */}
+        <div className="animate-fade-up" style={{ marginBottom: "24px" }}>
+          <span style={{
+            display: "inline-flex", alignItems: "center", gap: "6px",
+            padding: "6px 16px", borderRadius: "999px",
+            background: "rgba(255,107,0,0.1)", border: "1px solid rgba(255,107,0,0.25)",
+            fontSize: "12px", fontWeight: 700, color: "#C84B00",
+            letterSpacing: "0.08em", textTransform: "uppercase",
+          }}>
+            ⭐ Your bucket list, reimagined
+          </span>
         </div>
 
         {/* Headline */}
-        <h1 className="animate-fade-up-delay-1 font-display text-6xl md:text-8xl font-bold text-charcoal leading-[1.05] tracking-tight max-w-4xl">
+        <h1 className="animate-fade-up-d1" style={{
+          fontSize: "clamp(48px, 8vw, 80px)",
+          fontWeight: 700,
+          lineHeight: 1.05,
+          letterSpacing: "-0.03em",
+          color: "#1C1C1E",
+          maxWidth: "800px",
+          marginBottom: "24px",
+        }}>
           Live the life{" "}
-          <span className="italic shimmer-text">you've</span>
-          <br />
-          always dreamed.
+          <span className="shimmer-text" style={{ fontStyle: "italic" }}>you've</span>
+          <br />always dreamed.
         </h1>
 
-        {/* Subheadline */}
-        <p className="animate-fade-up-delay-2 mt-7 font-body text-lg md:text-xl text-charcoal/50 max-w-xl leading-relaxed font-light">
+        {/* Sub-headline */}
+        <p className="animate-fade-up-d2" style={{
+          fontSize: "18px", lineHeight: "1.6", fontWeight: 400,
+          color: "#636366", maxWidth: "520px", marginBottom: "40px",
+        }}>
           NextUp is a beautifully simple bucket list app. Capture your wildest ambitions,
           organize them into lists, and check them off one by one.
         </p>
 
         {/* CTA */}
-        <div className="animate-fade-up-delay-3 mt-10 flex flex-col sm:flex-row items-center gap-4">
+        <div className="animate-fade-up-d3" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
           <button
             onClick={onGetStarted}
-            className="group relative inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl bg-burnt text-white font-body font-semibold text-base shadow-xl shadow-burnt/25 hover:bg-terracotta hover:shadow-terracotta/30 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
+            style={{
+              display: "inline-flex", alignItems: "center", gap: "10px",
+              padding: "16px 32px", borderRadius: "16px",
+              background: "#FF6B00", color: "#fff",
+              fontSize: "16px", fontWeight: 700,
+              border: "none", cursor: "pointer",
+              boxShadow: "0 8px 32px rgba(255,107,0,0.30)",
+              transition: "all 0.2s ease",
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = "#E05E00"; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 12px 36px rgba(255,107,0,0.35)"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "#FF6B00"; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 8px 32px rgba(255,107,0,0.30)"; }}
           >
-            Get Started — it's free
-            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform duration-200" />
+            Get started — it's free →
           </button>
-          <span className="text-xs font-body text-charcoal/30 font-light">No credit card required</span>
+          <span style={{ fontSize: "13px", color: "#AEAEB2", fontWeight: 400 }}>
+            Sign in with Google. No credit card required.
+          </span>
         </div>
 
-        {/* Floating stat chips */}
-        <div className="animate-fade-up-delay-4 mt-16 flex flex-wrap justify-center gap-3">
-          {["✈️ 2.4k trips planned", "🎯 18k goals achieved", "📋 9.1k lists created"].map((s) => (
-            <span
-              key={s}
-              className="px-4 py-2 rounded-xl bg-surface border border-black/5 text-xs font-body text-charcoal/60 font-medium shadow-sm"
-            >
-              {s}
-            </span>
+        {/* Stats */}
+        <div className="animate-fade-up-d4" style={{
+          display: "flex", flexWrap: "wrap", gap: "12px",
+          justifyContent: "center", marginTop: "56px",
+        }}>
+          {STATS.map(({ value, label }) => (
+            <div key={label} style={{
+              padding: "12px 20px", borderRadius: "12px",
+              background: "#fff", border: "1px solid rgba(0,0,0,0.08)",
+              boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+              display: "flex", flexDirection: "column", alignItems: "center",
+              minWidth: "120px",
+            }}>
+              <span style={{ fontSize: "22px", fontWeight: 700, color: "#1C1C1E", letterSpacing: "-0.02em" }}>{value}</span>
+              <span style={{ fontSize: "12px", color: "#8E8E93", fontWeight: 500, marginTop: "2px" }}>{label}</span>
+            </div>
           ))}
         </div>
       </section>
 
-      {/* Features */}
-      <section className="py-24 px-6 bg-surface">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="font-display text-4xl font-bold text-charcoal text-center mb-3">
+      {/* ── Features ── */}
+      <section style={{ background: "#F2F2F7", padding: "96px 24px" }}>
+        <div style={{ maxWidth: "960px", margin: "0 auto" }}>
+          <h2 style={{
+            fontSize: "clamp(32px,5vw,44px)", fontWeight: 700,
+            color: "#1C1C1E", textAlign: "center",
+            letterSpacing: "-0.025em", marginBottom: "8px",
+          }}>
             Everything you need.
           </h2>
-          <p className="text-center text-charcoal/40 font-body mb-14 text-base">
+          <p style={{
+            textAlign: "center", color: "#636366",
+            fontSize: "17px", marginBottom: "56px", fontWeight: 400,
+          }}>
             Thoughtfully designed. Effortlessly simple.
           </p>
-          <div className="grid md:grid-cols-3 gap-5">
-            {FEATURES.map(({ icon, title, desc }, i) => (
-              <div
-                key={title}
-                className="group p-7 rounded-3xl bg-white border border-black/5 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300"
-              >
-                <div className="mb-4 inline-flex p-2.5 rounded-xl bg-burnt/10 text-burnt group-hover:bg-burnt group-hover:text-white transition-colors duration-300">
-                  {icon}
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+            gap: "16px",
+          }}>
+            {FEATURES.map(({ emoji, title, desc }) => (
+              <div key={title} style={{
+                background: "#fff", borderRadius: "20px",
+                padding: "32px 28px",
+                border: "1px solid rgba(0,0,0,0.06)",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+              }}>
+                <div style={{
+                  width: "52px", height: "52px", borderRadius: "14px",
+                  background: "rgba(255,107,0,0.1)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: "24px", marginBottom: "20px",
+                }}>
+                  {emoji}
                 </div>
-                <h3 className="font-display text-lg font-semibold text-charcoal mb-2">{title}</h3>
-                <p className="text-sm font-body text-charcoal/50 leading-relaxed font-light">{desc}</p>
+                <h3 style={{
+                  fontSize: "18px", fontWeight: 700,
+                  color: "#1C1C1E", marginBottom: "8px", letterSpacing: "-0.01em",
+                }}>
+                  {title}
+                </h3>
+                <p style={{ fontSize: "15px", color: "#636366", lineHeight: "1.6", fontWeight: 400 }}>
+                  {desc}
+                </p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Footer CTA */}
-      <section className="py-24 px-6 bg-charcoal text-center">
-        <h2 className="font-display text-4xl md:text-5xl font-bold text-white mb-4">
+      {/* ── Footer CTA ── */}
+      <section style={{
+        background: "#1C1C1E", padding: "96px 24px",
+        textAlign: "center",
+      }}>
+        <h2 style={{
+          fontSize: "clamp(28px,5vw,48px)", fontWeight: 700,
+          color: "#fff", letterSpacing: "-0.03em",
+          marginBottom: "16px",
+        }}>
           Your next chapter starts{" "}
-          <span className="text-accent italic">now.</span>
+          <span style={{ color: "#FF9500", fontStyle: "italic" }}>now.</span>
         </h2>
-        <p className="text-white/40 font-body mb-8 text-base font-light">
+        <p style={{ color: "#8E8E93", fontSize: "17px", marginBottom: "36px", fontWeight: 400 }}>
           Join thousands already living their bucket lists.
         </p>
         <button
           onClick={onGetStarted}
-          className="inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl bg-accent text-charcoal font-body font-semibold text-base hover:bg-yellow-300 hover:-translate-y-0.5 transition-all duration-200 shadow-xl shadow-accent/20"
+          style={{
+            display: "inline-flex", alignItems: "center", gap: "8px",
+            padding: "16px 32px", borderRadius: "16px",
+            background: "#FF9500", color: "#1C1C1E",
+            fontSize: "16px", fontWeight: 700,
+            border: "none", cursor: "pointer",
+            boxShadow: "0 8px 32px rgba(255,149,0,0.30)",
+            transition: "all 0.2s ease",
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = "#E08600"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "#FF9500"; e.currentTarget.style.transform = "translateY(0)"; }}
         >
-          Start your list <ArrowRight size={18} />
+          Start your list →
         </button>
       </section>
 
-      {/* Footer bar */}
-      <div className="bg-charcoal border-t border-white/5 py-5 px-8 flex items-center justify-between">
-        <span className="font-display text-sm font-semibold text-white/40">
-          Next<span className="text-burnt">Up</span>
+      {/* ── Footer bar ── */}
+      <div style={{
+        background: "#1C1C1E", borderTop: "1px solid rgba(255,255,255,0.08)",
+        padding: "20px 32px", display: "flex",
+        alignItems: "center", justifyContent: "space-between",
+      }}>
+        <Logo dark />
+        <span style={{ fontSize: "12px", color: "#48484A", fontWeight: 400 }}>
+          © 2025 NextUp. All rights reserved.
         </span>
-        <span className="text-xs font-body text-white/20">© 2025 NextUp. All rights reserved.</span>
       </div>
     </div>
+  );
+}
+
+function Logo({ dark }) {
+  return (
+    <span style={{
+      fontWeight: 800, fontSize: "20px", letterSpacing: "-0.03em",
+      color: dark ? "#fff" : "#1C1C1E",
+    }}>
+      Next<span style={{ color: "#FF6B00" }}>Up</span>
+    </span>
   );
 }
